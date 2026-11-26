@@ -1,78 +1,80 @@
 # Checklist du projet Star Academy
 
 **Titre** — Star Academy : comment programmer un prime qui retient le public ?  
-**Question** — Quels formats et moments du prime retiennent le mieux le public en direct, l’incitent à voter et sont les plus regardés jusqu’au bout en replay ?  
-**Analyse principale** — Le taux de départ du direct par type de séquence, à créneau comparable.  
+**Question** — Quels formats et moments du prime sont associés à la meilleure rétention en direct, au plus grand nombre de votants et à la meilleure complétion en replay ?  
+**Analyse principale** — Mesurer, parmi les spectateurs présents au début d’une séquence, la part encore présente à sa fin, retours compris. Comparer la rétention par format et par tiers du prime.  
 **Date limite** — Vendredi 4 décembre 2026.
 
 ## 1. Dépôt et répartition
 
-- [x] Créer le dépôt GitHub [Projet-Big-Data](https://github.com/HarisoaR27/Projet-Big-Data).
-- [ ] Vérifier la visibilité **Public** et inviter le deuxième membre du binôme dans **Settings → Collaborators**.
-- [ ] Vérifier que chacun peut cloner le dépôt et pousser un commit sous sa propre identité GitHub.
-- [ ] Vérifier les dossiers `src/` pour le code et `evidence/` pour les captures. Ajouter `k8s/` si des manifestes Kubernetes sont utilisés.
-- [ ] Valider la répartition ci-dessous et ajuster les responsables si besoin.
+- [x] Créer le dépôt [Projet-Big-Data](https://github.com/HarisoaR27/Projet-Big-Data) et le cloner dans Onyxia.
+- [ ] Vérifier la visibilité publique du dépôt et l’accès du deuxième membre du binôme dans **Settings → Collaborators**.
+- [ ] Vérifier que chaque membre peut pousser un commit sous sa propre identité GitHub.
+- [ ] Vérifier que le code est versionné dans `src/` et que les images sont présentes dans `capture/`. Le sujet indique `evidence/` comme nom attendu pour le rendu. Confirmer avec l’enseignante si `capture/` est accepté.
+- [ ] Vérifier que l’historique contient **au moins 10 commits de travail réel répartis sur plusieurs jours**, avec des contributions visibles des deux membres.
+- [ ] Répartir la finalisation en binôme. Répartition proposée : un membre rejoue le pipeline, mesure l’alternative CSV/Parquet et finalise le README. L’autre rassemble les preuves et rédige le PDF. Relire le rendu ensemble.
 
-| Quand | Membre A | Membre B | Résultat commun |
-|---|---|---|---|
-| Jour 1 | Définir le conducteur et les sessions direct | Définir les fichiers jury, sondages, votes et replay | Fichiers, clés et règles approuvés ensemble |
-| Jour 2 | Générer le conducteur et le direct, déposer les données sur S3, traiter le direct et les invités | Générer les cinq autres CSV et traiter solo/duo, votes et replay | Premier bilan sur Onyxia |
-| Jour 3 | Rejouer le pipeline, mesurer une alternative technique et finaliser le README | Vérifier une séquence indépendamment, assembler les captures et rédiger le PDF | Relecture croisée et rendu prêt |
+## 2. Données et provenance
 
-- [ ] Faire **au moins 10 commits de travail réel sur plusieurs jours**, avec des contributions visibles des deux membres. Cible proposée : 4 au jour 1, 4 au jour 2, 3 au jour 3. Exemples : schémas, génération, traitement direct, traitement des autres indicateurs, contrôle, mesures, preuves, documentation.
+- [x] Générer les sept CSV définitifs à partir d’un scénario inspiré d’une sélection de prestations publiques des **25 octobre et 1er novembre 2025**.
+- [x] Utiliser un relevé ciblé assisté par IA à partir de TF1+ et de Stars Actu, puis un générateur Python à graine fixe pour respecter la limite de taille. Les horaires sont reconstruits et les comportements d’audience sont simulés.
+- [x] Générer les données le **26 novembre 2026** et vérifier la taille brute cumulée : **69 698 lignes de données et 4 889 399 octets hors compression (4,89 Mo)**.
+- [ ] Versionner `src/generer_donnees.py` et `PROVENANCE.md` depuis l’archive définitive. Indiquer dans le README la commande de génération, le dossier de sortie et la licence retenue.
 
-## 2. Définir et générer les données
-
-- [ ] Fixer ensemble les identifiants (`prime_id`, `sequence_id`, `prestation_id`, `candidat_id`, `spectateur_id` selon le fichier), le fuseau horaire et la règle d’attribution aux séquences. Utiliser des intervalles **début inclus, fin exclue** et définir une règle pour les départs et retours multiples.
-- [ ] Générer plusieurs primes fictifs avec différents créneaux, types de séquences et formats. Prévoir des comparaisons effectivement possibles, par exemple des solos et des duos pour un même candidat et un même style musical.
-- [ ] Versionner dans `src/` le ou les scripts Python de génération avec une graine fixe. Décrire le schéma et la provenance des données simulées.
-
-| Fichier brut | À générer |
+| Fichier brut | Contenu et rôle |
 |---|---|
-| `conducteur_primes_simule.csv` | Séquences horodatées par prime, type de séquence, prestation, candidats, style, format et présence d’un invité. Définir comment plusieurs candidats sont rattachés à une prestation. |
-| `sessions_direct_simulees.csv` | Une ligne par session d’un spectateur fictif, avec son arrivée et son départ du direct. Autoriser plusieurs sessions pour simuler les retours. |
+| `conducteur_primes_simule.csv` | Référentiel des séquences et prestations. Il contient les horaires, l’ordre, le format, les candidats, le style, les invités et la publication replay. Les candidats d’une même prestation sont séparés par `\|`. |
+| `sessions_direct_simulees.csv` | Une ligne par session de direct. Un spectateur peut avoir plusieurs sessions dans un prime, ce qui permet de représenter les retours. |
 | `notes_jury_simulees.csv` | Une note par juré, candidat et prestation. |
 | `sondages_public_simules.csv` | Une note par spectateur, candidat et prestation. |
-| `fenetres_vote_simulees.csv` | Heure d’ouverture et de fermeture de chaque fenêtre, identifiée dans son prime. |
-| `votes_public_simules.csv` | Votes horodatés, rattachés à une fenêtre, un votant fictif et un candidat. |
-| `sessions_replay_simulees.csv` | Visionnages horodatés, rattachés à une prestation, avec durée vue et durée totale. Prévoir l’heure de publication de la prestation dans le conducteur. |
+| `fenetres_vote_simulees.csv` | Horaires d’ouverture et de fermeture des fenêtres de vote, identifiées dans chaque prime. |
+| `votes_public_simules.csv` | Votes horodatés, associés à une fenêtre, à un votant et à un candidat. |
+| `sessions_replay_simulees.csv` | Lectures associées à une prestation, avec la durée vue et la durée totale. |
 
-- [ ] Générer quelques cas contrôlés à détecter, par exemple doublons, sessions dont la fin précède le début et votes hors fenêtre. Relever ensuite les anomalies réellement détectées et le nombre de lignes concernées.
-- [ ] Mesurer le poids **cumulé des sept CSV bruts**, entre **1 et 5 Mo**, par exemple avec `wc -c data/raw/*.csv`. Documenter le total exact, la date de génération et la licence retenue.
+## 3. Pipeline exécuté sur Onyxia
 
-## 3. Stocker et exécuter sur Onyxia
+- [x] Configurer le profil S3 `default` et déposer les sept CSV sous `s3://user-h-randrianasolo-ece/star-academy/raw/`.
+- [x] Télécharger les CSV de S3 dans un dossier temporaire sur Onyxia avec l’AWS CLI. Lire les fichiers avec **DuckDB** depuis le service VS Code PySpark.
+- [x] Écrire le traitement dans `src/indicateurs_sequences.sql`. Agréger les sources séparément avant de les joindre au conducteur pour éviter de multiplier les comptages.
+- [x] Publier le jeu final sous `s3://user-h-randrianasolo-ece/star-academy/processed/indicateurs_sequences.parquet`. La sortie contient **22 lignes**, une par séquence.
+- [x] Comparer les formats et les moments du prime avec `src/comparer_indicateurs.sql`.
+- [ ] Versionner les contrôles SQL. Reporter les compteurs effectivement affichés pour l’unicité des séquences, des votes et des fenêtres, ainsi que pour les votes sans fenêtre valide. Documenter les anomalies observées et le traitement appliqué, le cas échéant.
+- [ ] Rejouer les commandes du README depuis une session propre et vérifier que la sortie est republiée au même emplacement.
+- [ ] Mesurer une alternative technique. Comparer la taille et le temps de la même agrégation sur un CSV et son équivalent Parquet, avec les mêmes lignes et sur le même service. Reporter les mesures dans le PDF.
 
-- [ ] Vérifier l’accès au bucket S3 Onyxia ainsi qu’au service PySpark. Confirmer le mode d’exécution attendu par l’enseignante pour la preuve sur le cluster.
-- [ ] Déposer les sept CSV dans `s3://<bucket>/star-academy/raw/`. Utiliser la configuration du TP S3 et lister les objets après transfert.
-- [ ] Lire les données depuis S3 dans le pipeline. Si le service du TP utilise des fichiers locaux, documenter la copie depuis S3 vers la session Onyxia, puis le transfert du résultat vers S3.
-- [ ] Dans Spark, typer les dates et les notes, appliquer les règles de nettoyage, comptabiliser les lignes rejetées et repérer les identifiants sans correspondance.
-- [ ] Agréger les sources à la bonne granularité avant les jointures. Par exemple, calculer les notes du jury et du public séparément par candidat et prestation avant de les rapprocher.
+| Indicateur | Calcul réellement exécuté |
+|---|---|
+| **Rétention en direct** | Part des spectateurs présents au début et encore présents juste avant la fin. Un spectateur revenu avant la fin peut être compté comme retenu. |
+| **Vote** | Nombre de votes et de votants distincts par séquence. L’horodatage doit appartenir à la séquence et à une fenêtre de vote valide, avec début inclus et fin exclue. |
+| **Complétion en replay** | Part des lectures dont la durée vue atteint la durée totale, parmi les lectures simulées disponibles pour chaque prestation. |
+| **Jury et sondages** | Moyennes calculées séparément par prestation, utilisées comme informations complémentaires. |
 
-| À cocher | Indicateur | Calcul à implémenter |
-|---|---|---|
-| ☐ | Départs du direct | Pour chaque séquence, rapporter les spectateurs présents au début qui quittent pendant la séquence aux spectateurs présents au début. Comparer les taux par type de séquence et créneau. |
-| ☐ | Retours et invités | Parmi les spectateurs ayant déjà quitté le direct et absents au début de la prestation, calculer la part qui revient pendant celle-ci. Comparer avec et sans invité dans des créneaux comparables. |
-| ☐ | Solo et duo | Comparer séparément les notes moyennes du jury et du public pour les candidats ayant chanté dans les deux formats, à style musical comparable. |
-| ☐ | Participation au vote | Compter les votants uniques par fenêtre, puis rapporter le nombre à 1 000 spectateurs présents à l’ouverture. Comparer des fenêtres de même durée. |
-| ☐ | Replay | Parmi les visionnages démarrés dans les 48 h suivant la publication, calculer la part regardée jusqu’au bout par format de prestation. |
+Les pistes initiales sur l’effet des invités, la comparaison solo/duo à candidat et style comparables, le taux de vote pour 1 000 spectateurs et la complétion à 48 heures restent des prolongements. Les résultats du rendu s’appuient sur les calculs du tableau ci-dessus.
 
-- [ ] Exécuter le pipeline sur Onyxia et déposer le bilan d’analyse dans `s3://<bucket>/star-academy/processed/`. Afficher les effectifs avec les taux. Pour un dénominateur nul, afficher une valeur manquante.
-- [ ] Rejouer le pipeline depuis une session propre. Vérifier le résultat et documenter comment relancer le traitement sans dupliquer les sorties.
-- [ ] Mesurer une alternative technique. Exemple : écrire le même tableau intermédiaire en CSV et Parquet, comparer les tailles et chronométrer la même agrégation à la relecture sur le même service. Conserver les mesures dans le rapport et justifier le choix final.
+## 4. Résultats et preuves
 
-## 4. Vérifier et capturer les preuves
+- [x] Vérifier indépendamment les votes de `prime_02_seq_02`. Le comptage Python depuis les CSV bruts et le Parquet récupéré depuis S3 donnent **333 votes et 333 votants distincts**.
+- [x] Relever les résultats de la comparaison. La rétention est de **94,97 % en début de prime** et de **86,43 % en fin de prime**. Le battle atteint **629 votants sur une seule séquence**. Les solos affichent **56,52 % de complétion replay sur deux prestations**.
+- [ ] Enregistrer dans `src/` le script Python utilisé pour la vérification indépendante, avec sa commande d’exécution.
+- [ ] Vérifier que chaque capture affiche l’identifiant ou le namespace Onyxia, la date et l’heure. Reprendre la capture 07 en incluant ces éléments. Vérifier que les images publiées ne montrent aucun secret.
 
-- [ ] Recalculer indépendamment le taux de départ d’une séquence à partir du conducteur et des sessions brutes, avec un script Python séparé dans `src/`. Comparer les **deux effectifs** et le taux avec Spark.
-- [ ] Capturer le contenu S3 pour le brut et le traité. Capturer une trace d’exécution de **chaque composant utilisé**.
-- [ ] Vérifier que chaque capture affiche **l’identifiant Onyxia ou le namespace, la date et l’heure**. Numéroter les fichiers dans `evidence/` et les référencer dans le rapport. Vérifier que les captures destinées au dépôt public ne montrent aucun secret.
+| Capture | Preuve attendue |
+|---|---|
+| `01_s3_donnees_brutes.png` | Les sept CSV sont présents sur S3 et leur taille cumulée est de 4 889 399 octets. |
+| `02_duckdb_lecture_csv.png` | DuckDB lit le conducteur téléchargé depuis S3 et affiche 22 séquences, dont 10 prestations. |
+| `03_duckdb_controles_qualite.png` | Les compteurs de contrôle sont affichés avant le calcul. Les clés et les fenêtres conditionnent la fiabilité du comptage des votes. |
+| `04_duckdb_execution_pipeline.png` | Le SQL exporte une ligne par séquence et affiche un aperçu des indicateurs. |
+| `05_s3_donnees_traitees.png` | Le Parquet final est publié sur S3 et sa taille est de 3 901 octets. |
+| `06_verification_independante.png` | Les deux méthodes retrouvent les mêmes 333 votes et 333 votants distincts. |
+| `07_comparaison_formats_moments.png` | Le tableau d’analyse compare les formats et les trois moments du prime, avec le nombre de séquences par groupe. |
 
 ## 5. Finaliser et rendre
 
-- [ ] Limiter le `README.md` à **une page** et respecter l’ordre demandé : auteurs (noms, prénoms), prérequis, données (nom, URL ou lien vers le générateur, licence, date, taille), problématique en trois phrases maximum, chemins S3, commandes de reproduction et méthode de redémarrage. Documenter l’accès aux dépendances et aux données.
-- [ ] Préparer le **PDF de quatre pages maximum, annexes comprises**.
-  1. Problématique, données, source, justification, taille, schéma et lien Git.
-  2. Diagramme du pipeline, choix techniques, alternative et mesures.
-  3. Qualité des données, exemples et nombres de lignes touchées, résultats et vérification indépendante.
-  4. Limites de la simulation, effets attendus sur les résultats et le traitement avec **100 fois plus de données**, références des preuves.
-- [ ] Vérifier en binôme le PDF, l’accès public au dépôt et l’historique des contributions.
+- [ ] Finaliser le `README.md` sur **une page**, avec les auteurs, les informations d’exécution demandées, la provenance, la licence, les chemins S3, les commandes de reproduction et les liens vers les preuves.
+- [ ] Préparer le **PDF de quatre pages maximum, annexes comprises** :
+  1. Problématique, données, schéma des fichiers et lien vers le dépôt Git.
+  2. Diagramme du pipeline, justification de DuckDB et résultats de la comparaison CSV/Parquet.
+  3. Contrôles qualité, compteurs d’anomalies, résultats et vérification indépendante.
+  4. Limites du scénario simulé, effets attendus avec **100 fois plus de données** et références aux preuves.
+- [ ] Relire le PDF en binôme et vérifier le dépôt public, les liens et l’historique des contributions.
 - [ ] Envoyer le PDF par e-mail avant le **4 décembre 2026**. Objet : `Ecosystème Big Data II - <GrXX> - <NOM1 Prénom1> - <NOM2 Prénom2>`.
